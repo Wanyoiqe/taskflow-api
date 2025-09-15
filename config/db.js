@@ -1,4 +1,5 @@
-const mysql = require('mysql2');
+// const mysql = require('mysql2');
+import mysql from 'mysql2';
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -7,4 +8,4 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'todoapp'
 });
 
-module.exports = pool.promise();
+export default pool.promise();

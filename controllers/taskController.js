@@ -1,64 +1,84 @@
-const db = require('../config/db');
+// controllers/taskController.js
+import { validateTitle, validateDescription } from '../helpers.js'
+import {Task} from '../taskModel.js'
 
-// Get all tasks
-exports.getTasks = async (req, res) => {
+
+
+// ================= CREATE TASK =================
+const createTask = async (req, res) => {
+  const { title, description } = req.body;
+
   try {
-    const [rows] = await db.query('SELECT * FROM tasks');
-    res.json(rows);
+    if (title) validateTitle(title);
+    if (description) validateDescription(description);
+
+    const task = await Task.create({ title, description });
+    res.status(201).json(task);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(400).json({ message: err.message });
   }
 };
 
-// Get single task by ID
-exports.getTask = async (req, res) => {
+// ================= GET ALL TASKS =================
+const getTasks = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Task not found' });
-    res.json(rows[0]);
+    const tasks = await Task.findAll();
+    res.json(tasks);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Error fetching tasks" });
   }
 };
 
-// Create a new task
-exports.createTask = async (req, res) => {
+// ================= GET TASK BY ID =================
+const getTaskById = async (req, res) => {
   try {
-    const { title, description } = req.body;
-    if (!title) return res.status(400).json({ message: 'Title is required' });
-
-    const [result] = await db.query(
-      'INSERT INTO tasks (title, description) VALUES (?, ?)',
-      [title, description || null]
-    );
-    res.status(201).json({ id: result.insertId, title, description, completed: false });
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json(task);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Error fetching task" });
   }
 };
 
-// Update a task
-exports.updateTask = async (req, res) => {
+// ================= UPDATE TASK =================
+const updateTask = async (req, res) => {
+  const { title, description } = req.body;
+
   try {
-    const { title, description, completed } = req.body;
-    const [result] = await db.query(
-      'UPDATE tasks SET title = ?, description = ?, completed = ? WHERE id = ?',
-      [title, description, completed, req.params.id]
-    );
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Task not found' });
-    res.json({ message: 'Task updated successfully' });
+    if (title) validateTitle(title);
+    if (description) validateDescription(description);
+
+    const updatedTask = await Task.update(req.params.id, { title, description });
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json(updatedTask);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(400).json({ message: err.message });
   }
 };
 
-// Delete a task
-exports.deleteTask = async (req, res) => {
+// ================= DELETE TASK =================
+const deleteTask = async (req, res) => {
   try {
-    const [result] = await db.query('DELETE FROM tasks WHERE id = ?', [req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Task not found' });
-    res.json({ message: 'Task deleted successfully' });
+    const deleted = await Task.delete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json({ message: "Task deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Error deleting task" });
   }
 };
+
+// ================= EXPORT =================
+export {
+  createTask,
+  getTasks,
+  getTaskById,
+  updateTask,
+  deleteTask,
+};
+

@@ -1,6 +1,6 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const taskRoutes = require('./routes/taskRoutes');
+import express from 'express'
+import dotenv from'dotenv';
+import taskRoutes from './routes/taskRoutes.js';
 
 dotenv.config();
 
