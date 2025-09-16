@@ -1,11 +1,17 @@
-// const mysql = require('mysql2');
-import mysql from 'mysql2';
+import mongoose from "mongoose";
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
-  database: process.env.DB_NAME || 'todoapp'
-});
+const connectDB = async () => {
+  try {
+    const mongodbUri = process.env.MONGO_URI
+    await mongoose.connect(mongodbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected...");
+  } catch (err) {
+    console.error("MongoDB connection error:", err.message);
+    process.exit(1);
+  }
+};
 
-export default pool.promise();
+export default connectDB;

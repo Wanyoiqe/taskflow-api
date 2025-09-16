@@ -1,8 +1,11 @@
+import mongoose from 'mongoose';
+import Task from './models/taskModel.js';
+
 export function countWords(text) {
   return text.trim().split(/\s+/).length;
 }
 
-export function validateTitle(title) {
+export async function validateTitle(title) {
   if (!title || String(title).trim() === "") {
     throw new Error("Title is required");
   }
